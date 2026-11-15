@@ -1,0 +1,68 @@
+name: Build iPhone app (free sideload)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: airside-iphone-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  iphone:
+    name: Build unsigned iPhone IPA
+    runs-on: macos-26
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: source/airside
+    env:
+      CI: '1'
+      EXPO_NO_TELEMETRY: '1'
+      NODE_ENV: production
+      RCT_NO_LAUNCH_PACKAGER: '1'
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Unpack the supplied app source
+        working-directory: .
+        run: unzip -q Airside-source.zip -d source
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: source/airside/package-lock.json
+      - name: Check build tools
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+          pod --version
+      - name: Install dependencies, including verification tools
+        run: npm ci --include=dev
+      - name: Check application
+        run: npm run check
+      - name: Generate iOS project and install native dependencies
+        run: npx expo prebuild --platform ios --no-install && npx pod-install ios
+      - name: Compile and package the iPhone application
+        run: bash scripts/build-ios-unsigned.sh
+      - name: Upload iPhone app
+        uses: actions/upload-artifact@v6
+        with:
+          name: Airside-iPhone-unsigned
+          path: |
+            source/airside/build/ios-unsigned/Airside-unsigned.ipa
+            source/airside/build/ios-unsigned/Airside-unsigned.ipa.sha256
+            source/airside/FREE-IPHONE-INSTALL.md
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload build diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: Airside-iPhone-build-diagnostics
+          path: |
+            source/airside/build/ios-unsigned/xcodebuild.log
+            source/airside/build/ios-unsigned/Airside-build.xcresult
+          if-no-files-found: ignore
+          retention-days: 3
