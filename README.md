@@ -1,31 +1,24 @@
-# CloseBy 1.2.1
+# CloseBy 1.3
 
-Fully offline Bluetooth rooms for up to eight nearby participants. Any supported iPhone or Android phone can create or join a room. The creator relays messages, so everyone must stay nearby with CloseBy open. Android hosting requires BLE advertising support.
+Offline Bluetooth group chats for up to eight nearby people. Any supported iPhone or Android can create or join. Android hosting requires BLE advertising support. One room connects at a time; the owner relays messages and must stay nearby with CloseBy open.
 
-## New in 1.2.1
+## New in 1.3
 
-- Removed suggested snack/outside messages. Demo participants are S and W.
-- Voice playback explicitly restores the iOS audio session with silent-mode playback enabled after recording and before playing received memos. Physical iPhone playback still needs verification.
-- Today’s chats appear on the home screen, saved on this phone with role, code and original expiry. Reopening uses Bluetooth and owner approval again; only one room can connect at a time. Switching rooms clears the previous in-memory messages. The list contains today’s created/approved joined rooms, not a server membership directory.
+- Real room messages and media survive entering the demo, leaving a room, switching rooms and restarting the app. Room history is encrypted locally with a random per-room key stored in the platform secure store. Fresh Bluetooth keys and approval are still required when reconnecting. Live transport sessions are never restored from disk.
+- The original 24-hour deadline remains unchanged. Expired saved rooms and their keys are deleted while running or on next launch/resume. Clear messages deletes this phone's saved copy. Leaving a room preserves it. Copies saved by other people cannot be deleted remotely.
+- Record video opens the system camera after camera/microphone permission. Clips are limited to five seconds and 1 MB. Low quality is requested; phones may produce larger files, which are rejected with a request for a shorter clip. MP4 and camera MOV containers are supported. Tap a received/sent video to play it with native controls.
+- Bluetooth video transfers can take several minutes. Progress, cancellation and explicit retry are available. Keep everyone nearby and reopen/reconnect after recording if the camera interrupted the Bluetooth session.
 
-## Features from 1.2
+## Existing features
 
-- Six-character codes such as `ABC 123`.
-- Owner approval for each new connection. Compare the six-digit verification number on both phones before approving; names are self-chosen and are not verified identities.
-- Rooms expire 24 hours after creation. The deadline is shared with guests and shown in the chat. The app clears room messages, connection keys, its saved room code and temporary media at expiry while running, or when next opened after suspension. Offline expiry uses the phones' clocks. There is no internet registry reserving codes forever; a later new room can coincidentally use the same short code and gets fresh keys.
-- Typing indicators, in-app new-message alerts, and optional local OS notifications for messages actually received over Bluetooth. Enable message alerts in Settings. There are no push tokens, APNs/FCM delivery servers, or reliable delivery while the app is closed/suspended. Notifications omit message contents and media.
-- Photos selected through the system picker, re-encoded to JPEG at up to 480 pixels on the longest side. Attachments are limited to 64 KB.
-- Mono AAC voice recording and playback, up to 15 seconds, recorded only after tapping Record and granting microphone access.
-- Chunked media transfers with progress, cancellation, retry, duplicate suppression, bounded reassembly and SHA-256 integrity checks. Bluetooth transfers can be slow, particularly with many participants. Video and general file sharing are not included.
+Six-character invitation codes such as ABC 123; owner approval with matching verification numbers; today's rooms on the home screen; text, small photos and 15-second voice messages; typing indicators and optional local alerts. Demo participants are S and W. The demo is simulated and is not saved to real room history. Messages lost before this update cannot be recovered.
 
-## Connection privacy
+Photos and voice files remain limited to 64 KB each. Video is limited to 1 MB, total room media to 4 MB, and room packets/messages to 6000. The short code identifies a room and is not an encryption password. Each approved connection uses fresh Noble X25519/HKDF-SHA256 keys and XChaCha20-Poly1305 encryption; compare verification numbers before approval. This custom protocol has software tests but no independent security audit. The owner can read and relay messages.
 
-The short code identifies a nearby room; it is not a strong password. Each approved link derives a fresh encryption key using Noble X25519 and HKDF-SHA256, and seals frames with XChaCha20-Poly1305. A verification number derived from the connection transcript is shown on both phones for comparison. Do not approve mismatched numbers. This protocol has software tests but has not had an independent security audit. The owner can read and relay group messages. Room participants can save copies outside CloseBy; those cannot be remotely deleted.
+There are no internet messaging servers, remote push notifications or analytics. Android INTERNET permission is blocked. Fully offline message receipt is not reliable while suspended or closed. Expiry uses phone clocks; cleanup runs when the operating system lets the app run.
 
-## Testing and installation
+## Build and validation
 
-Run `npm ci`, then `npm run check`. `npx expo export --platform web` plus `node scripts/verify-ui.cjs` checks the browser demo and create/join screens. The solo demo includes simulated participants and a generated photo illustration; no messages leave the device.
+Run npm ci, then npm run check. The suite has 49 tests, including encrypted archive tampering/expiry, restored owner/guest reconnection, media restoration, video bounds, receipt handling and short-code approval. Browser export plus scripts/verify-ui.cjs verifies the preview. Native camera, secure storage, video/audio playback and Bluetooth interoperability require physical-phone testing.
 
-The Android release is a personal-test ARM64 APK. The iPhone GitHub workflow compiles an unsigned IPA on macOS, then Sideloadly signs it locally with the user's Apple account. The bundle/package identifier remains `com.airside.privatechat` for update continuity. Existing repository, archive folder and unsigned IPA filenames retain legacy Airside names. The app display name is CloseBy.
-
-Update every participant to 1.2; the approval/encryption layer and short-code discovery cannot communicate with 1.1 or the original Airside app. Follow INSTALL.md for the physical-phone checklist. Radio interoperability, audio recording/playback, photo picking and local notification behavior must be checked on actual phones before relying on them.
+Android is a personal-test ARM64 APK. The GitHub iPhone workflow compiles an unsigned IPA; install with Sideloadly using the same Apple account as before. Update all phones to 1.3 for video support. Bundle/package identifier stays com.airside.privatechat. Repository and IPA filenames retain the legacy Airside name.
