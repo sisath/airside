@@ -1,21 +1,25 @@
-# CloseBy
+# CloseBy 1.2
 
-Offline Bluetooth group text chat. Choose **Create a chat** to generate a code, or **Join a chat** to enter an existing code. Either iPhone or Android can act as the room owner or joiner; Android hosting requires BLE advertising support.
+Fully offline Bluetooth rooms for up to eight nearby participants. Any supported iPhone or Android phone can create or join a room. The creator relays messages, so everyone must stay nearby with CloseBy open. Android hosting requires BLE advertising support.
 
-The owner relays messages to a maximum of seven guests (eight people total). Everyone must remain near the owner with Bluetooth on and the app open. There is no automatic owner transfer, internet fallback, background notification service, or earlier-history download for late joiners. Actual simultaneous connection limits depend on the phones.
+## New in 1.2
 
-## Privacy and delivery
+- Six-character codes such as `ABC 123`.
+- Owner approval for each new connection. Compare the six-digit verification number on both phones before approving; names are self-chosen and are not verified identities.
+- Rooms expire 24 hours after creation. The deadline is shared with guests and shown in the chat. The app clears room messages, connection keys, its saved room code and temporary media at expiry while running, or when next opened after suspension. Offline expiry uses the phones' clocks. There is no internet registry reserving codes forever; a later new room can coincidentally use the same short code and gets fresh keys.
+- Typing indicators, in-app new-message alerts, and optional local OS notifications for messages actually received over Bluetooth. Enable message alerts in Settings. There are no push tokens, APNs/FCM delivery servers, or reliable delivery while the app is closed/suspended. Notifications omit message contents and media.
+- Photos selected through the system picker, re-encoded to JPEG at up to 480 pixels on the longest side. Attachments are limited to 64 KB.
+- Mono AAC voice recording and playback, up to 15 seconds, recorded only after tapping Record and granting microphone access.
+- Chunked media transfers with progress, cancellation, retry, duplicate suppression, bounded reassembly and SHA-256 integrity checks. Bluetooth transfers can be slow, particularly with many participants. Video and general file sharing are not included.
 
-The random 20-character invitation code has 100 bits of entropy. Discovery IDs and encryption keys use separate versioned domains. Room packets use XChaCha20-Poly1305 with fresh random nonces and per-connection challenge responses. Names are self-chosen, not verified identities; anyone with the invitation code can join and read the room. The owner can read and relay messages. This is shared-code room encryption, not protection against another room member.
+## Connection privacy
 
-A message becomes Delivered only after every participant present when the owner accepted it acknowledges receipt. Queued/sending/retry states avoid treating a successful Bluetooth write as delivery. Retries suppress duplicates. Messages remain in memory, with a 1000-message session limit; the name, code and last role are saved in secure device storage.
+The short code identifies a nearby room; it is not a strong password. Each approved link derives a fresh encryption key using Noble X25519 and HKDF-SHA256, and seals frames with XChaCha20-Poly1305. A verification number derived from the connection transcript is shown on both phones for comparison. Do not approve mismatched numbers. This protocol has software tests but has not had an independent security audit. The owner can read and relay group messages. Room participants can save copies outside CloseBy; those cannot be remotely deleted.
 
-## Build and test
+## Testing and installation
 
-Run `npm ci`, then `npm run check`. `npx expo export --platform web` and `node scripts/verify-ui.cjs` verify the three-person demo and create/join screens. Browser tests simulate the room protocol, not Bluetooth radios.
+Run `npm ci`, then `npm run check`. `npx expo export --platform web` plus `node scripts/verify-ui.cjs` checks the browser demo and create/join screens. The solo demo includes simulated participants and a generated photo illustration; no messages leave the device.
 
-The native Swift and Kotlin implementations are in `modules/airside-bluetooth`. Both platforms implement BLE peripheral hosting and central joining. Native identifiers and storage keys retain their original Airside names so updates retain the same application identity.
+The Android release is a personal-test ARM64 APK. The iPhone GitHub workflow compiles an unsigned IPA on macOS, then Sideloadly signs it locally with the user's Apple account. The bundle/package identifier remains `com.airside.privatechat` for update continuity. Existing repository, archive folder and unsigned IPA filenames retain legacy Airside names. The app display name is CloseBy.
 
-The GitHub workflow prebuilds the iOS project and runs `scripts/build-ios-unsigned.sh` on macOS. The unsigned output retains the legacy filename `Airside-unsigned.ipa` for compatibility with the existing repository workflow; the app's display name is CloseBy. Sign it on Windows with Sideloadly using the same Apple account as the installed app. Use the same bundle identifier override, if one was chosen previously.
-
-The new room protocol is incompatible with the original two-person Airside build. Update every participant's app. Test iPhone→iPhone, iPhone→Android, Android→iPhone and Android→Android on physical phones before relying on the app while travelling.
+Update every participant to 1.2; the approval/encryption layer and short-code discovery cannot communicate with 1.1 or the original Airside app. Follow INSTALL.md for the physical-phone checklist. Radio interoperability, audio recording/playback, photo picking and local notification behavior must be checked on actual phones before relying on them.
