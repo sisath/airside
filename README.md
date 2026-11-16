@@ -1,8 +1,14 @@
-# CloseBy 1.2
+# CloseBy 1.2.1
 
 Fully offline Bluetooth rooms for up to eight nearby participants. Any supported iPhone or Android phone can create or join a room. The creator relays messages, so everyone must stay nearby with CloseBy open. Android hosting requires BLE advertising support.
 
-## New in 1.2
+## New in 1.2.1
+
+- Removed suggested snack/outside messages. Demo participants are S and W.
+- Voice playback explicitly restores the iOS audio session with silent-mode playback enabled after recording and before playing received memos. Physical iPhone playback still needs verification.
+- Today’s chats appear on the home screen, saved on this phone with role, code and original expiry. Reopening uses Bluetooth and owner approval again; only one room can connect at a time. Switching rooms clears the previous in-memory messages. The list contains today’s created/approved joined rooms, not a server membership directory.
+
+## Features from 1.2
 
 - Six-character codes such as `ABC 123`.
 - Owner approval for each new connection. Compare the six-digit verification number on both phones before approving; names are self-chosen and are not verified identities.
