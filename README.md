@@ -1,8 +1,17 @@
-# CloseBy 1.3
+# CloseBy 1.4
 
 Offline Bluetooth group chats for up to eight nearby people. Any supported iPhone or Android can create or join. Android hosting requires BLE advertising support. One room connects at a time; the owner relays messages and must stay nearby with CloseBy open.
 
-## New in 1.3
+## New in 1.4
+
+- Tap the CloseBy logo in a chat to return to today's chats, keeping the room and its saved history.
+- Removed explanatory banners/footer copy. App labels and controls use title case; user-authored text and names are preserved.
+- The chat menu contains Show Chat Code, Enable Message Alerts, Clear Messages On This Phone and End Chat, plus the actual app version. Alerts default on for each room, request OS permission and can be turned off. Clear affects only this phone's copy of the current room.
+- Tap the group icon to see current connected/available participants.
+- Photo, video and voice controls are icon buttons. Tap the heart to send a vibrating heart to the group and open an optional custom-message composer. Sending that message also carries the heart/vibration flag. Tap a heart message to reply. Incoming vibration respects the room's alerts setting and phone vibration settings; offline/suspended delivery still cannot be guaranteed.
+- Encrypted room messages, approval, media and original expiry are retained. All participants should update to 1.4 for heart vibration support.
+
+## Features From 1.3
 
 - Real room messages and media survive entering the demo, leaving a room, switching rooms and restarting the app. Room history is encrypted locally with a random per-room key stored in the platform secure store. Fresh Bluetooth keys and approval are still required when reconnecting. Live transport sessions are never restored from disk.
 - The original 24-hour deadline remains unchanged. Expired saved rooms and their keys are deleted while running or on next launch/resume. Clear messages deletes this phone's saved copy. Leaving a room preserves it. Copies saved by other people cannot be deleted remotely.
@@ -19,6 +28,6 @@ There are no internet messaging servers, remote push notifications or analytics.
 
 ## Build and validation
 
-Run npm ci, then npm run check. The suite has 49 tests, including encrypted archive tampering/expiry, restored owner/guest reconnection, media restoration, video bounds, receipt handling and short-code approval. Browser export plus scripts/verify-ui.cjs verifies the preview. Native camera, secure storage, video/audio playback and Bluetooth interoperability require physical-phone testing.
+Run npm ci, then npm run check. The suite has 51 tests, including encrypted archive tampering/expiry, restored owner/guest reconnection, media restoration, video bounds, receipt handling and short-code approval. Browser export plus scripts/verify-ui.cjs verifies the preview. Native camera, secure storage, video/audio playback and Bluetooth interoperability require physical-phone testing.
 
-Android is a personal-test ARM64 APK. The GitHub iPhone workflow compiles an unsigned IPA; install with Sideloadly using the same Apple account as before. Update all phones to 1.3 for video support. Bundle/package identifier stays com.airside.privatechat. Repository and IPA filenames retain the legacy Airside name.
+Android is a personal-test ARM64 APK. The GitHub iPhone workflow compiles an unsigned IPA; install with Sideloadly using the same Apple account as before. Update all phones to 1.4 for heart and video support. Bundle/package identifier stays com.airside.privatechat. Repository and IPA filenames retain the legacy Airside name.
